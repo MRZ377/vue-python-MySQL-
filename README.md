@@ -1,5 +1,5 @@
 ## vue项目的启动
-cd ./fontend
+cd ./fontend\n
 npm install
 npm run serve
 
