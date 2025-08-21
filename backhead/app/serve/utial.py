@@ -19,3 +19,17 @@ def del_book_dir(bookid:int, bookdir) ->bool:
             print(e)
             return False
     return False
+
+def del_chapter(bookid:int, chapter_no:int, bookdir) -> bool:
+    """删除对应章节"""
+    bookdir = os.path.join(bookdir, str(bookid))
+    chapter_name = f"{chapter_no}.html"
+    chapter_path = os.path.join(bookdir, str(chapter_name))
+    if os.path.isfile(chapter_path):
+        try:
+            os.remove(chapter_path)
+            return True
+        except Exception as e:
+            print(e)
+            return False
+    return False

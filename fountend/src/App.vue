@@ -7,9 +7,11 @@
                 <a href="/register">用户注册</a>
             </div>
             <div v-if="loginstate" class="toplogin">
-                <p>欢迎！</p>
-                &nbsp;&nbsp;
-                <a href="/user/userinfo">{{ user.username }}</a>
+                欢迎！
+                &nbsp;
+                {{ user.username }}
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <button style="font-size: 14px;color: orange;" @click="logout">登出</button>
             </div>
         </div>
     </div>
@@ -86,13 +88,19 @@ export default{
     },
     
     methods:{
-      handleSearch(){
-        if(this.searchQuery.trim() === ''){
-            alert('请先输入');
-            return;
-        }
-        this.$router.push({path:'/search', query:{q:this.searchQuery}});
-      },
+        handleSearch(){
+            if(this.searchQuery.trim() === ''){
+                alert('请先输入');
+                return;
+            }
+            this.$router.push({path:'/search', query:{q:this.searchQuery}});
+        },
+        logout() {
+            this.$store.commit('setLoginState', false)
+            this.$store.commit('setUser', null)
+            localStorage.removeItem('loginState')
+            localStorage.removeItem('user')
+        },
     },
 }
 </script>

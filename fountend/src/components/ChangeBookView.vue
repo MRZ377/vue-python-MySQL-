@@ -1,7 +1,7 @@
 <template>
     <div class="warp">
         <div class="addbookinfo">
-            <h2>添加书籍</h2>
+            <h2>修改书籍</h2>
             <form @submit.prevent="handleSubmit()">
                 <label for="">书名：</label>
                 <input type="text" v-model="form.bookname">
@@ -15,6 +15,13 @@
                 <input type="text" v-model="form.bookinfo">
                 <button type="submit">提交</button>
             </form>
+            <form @submit.prevent="handleSearch()">
+                <label for="">书名：</label>
+                <input type="text" v-model="query.bookname">
+                <label for="">作者：</label>
+                <input type="text" v-model="query.author">
+                <button type="submit">查询</button>
+            </form>
         </div>
     </div>
 </template>
@@ -26,6 +33,10 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter()
 const store = useStore()
+const query = reactive({
+    bookname:'',
+    author:''
+})
 const form = reactive({
     bookname: '',
     author: '',
@@ -38,7 +49,7 @@ const isLoggedIn = computed(() => store.getters.getLoginState)
 
 async function handleSubmit() {
     if(permissions.value !== 'admin'){
-        alert("当前账号不是管理员账号，无权添加书籍")
+        alert("当前账号不是管理员账号，无权修改")
         return;
     }
     if(!form.bookname || !form.author || !form.bookinfo || !form.category){
@@ -46,11 +57,32 @@ async function handleSubmit() {
         return
     }
     try{
-        const res = await store.dispatch('addBook', form)
-        alert(res.message || '添加成功')
+        const res = await store.dispatch('updatebook', form)
+        alert(res.message || '修改成功')
         Object.keys(form).forEach(k => form[k] = '')
     }catch(e){
-        alert(e?.response?.data?.message || '添加失败')
+        alert(e?.response?.data?.message || '修改失败')
+    }
+}
+
+async function handleSearch() {
+    if(permissions.value !== 'admin'){
+        alert("当前账号不是管理员账号，无权修改")
+        return;
+    }
+    if(!query.bookname || !query.author){
+        alert("作者或书名为空")
+        return
+    }
+    try{
+        const data = await store.dispatch('searchbook', {bookname:query.bookname, author:query.author})
+        if (!data){
+            alert("查询错误")
+            return
+        }
+        Object.assign(form,data)
+    }catch(e){
+        alert(e?.response?.data?.message || '查询失败')
     }
 }
 

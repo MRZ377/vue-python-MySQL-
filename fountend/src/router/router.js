@@ -10,6 +10,9 @@ import AddBookInfoView from '@/components/AddBookInfoView.vue';
 import DelBookView from '@/components/DelBookView.vue';
 import AddChapterView from '@/components/AddChapterView.vue';
 import ContentView from '@/components/ContentView.vue';
+import ChangeBookView from '@/components/ChangeBookView.vue';
+import ChangeChapterView from '@/components/ChangeChapterView.vue';
+import DelChapterView from '@/components/DelChapterView.vue';
 
 const routes = [
     {path:'/', component:IndexView, name:'index'},
@@ -22,7 +25,10 @@ const routes = [
     {path:'/addbook', component:AddBookInfoView, name:'addbook'},
     {path:'/delbook', component:DelBookView, name:'delbook'},
     {path:'/addchapter', component:AddChapterView, name:'addchapter'},
-    {path:'/books/:bookid(\\d+)/:chapter_no(\\d+)', component:ContentView, name:'content'}
+    {path:'/books/:bookid(\\d+)/:chapter_no(\\d+)', component:ContentView, name:'content'},
+    {path:'/updatebook', component:ChangeBookView, name:'updatebook'},
+    {path:'/updatechapter', component:ChangeChapterView, name:'updatechapter'},
+    {path:'/delchapter', component:DelChapterView, name:'delchapter'},
 ]
 
 const router = createRouter({

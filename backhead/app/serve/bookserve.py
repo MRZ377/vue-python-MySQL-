@@ -195,11 +195,11 @@ class Bookserve:
         finally:
             session.close()
 
-    def changebook(self, bookname:str, bookinfo:str, author:str, bookimage:str, category:str, bookid:str) -> bool:
+    def changebook(self, bookname:str, bookinfo:str, author:str, bookimage:str, category:str) -> bool:
         """修改书籍信息"""
         session = self.Session()
         try:
-            book = session.query(Book).filter_by(BookID = bookid, BookName = bookname).first()
+            book = session.query(Book).filter_by(Author = author, BookName = bookname).first()
             if not book:
                 return False
             book.BookName = bookname
@@ -207,6 +207,7 @@ class Bookserve:
             book.BookImage = bookimage
             book.BookInfo = bookinfo
             book.Category = category
+            session.commit()
             return True
         except SQLAlchemyError as e:
             session.rollback()

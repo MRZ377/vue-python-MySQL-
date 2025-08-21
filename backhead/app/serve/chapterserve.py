@@ -48,12 +48,12 @@ class Chapterserve:
         finally:
             session.close()
 
-    def delchapter(self, keyword:str, chaptertitle:str) -> bool:
+    def delchapter(self, bookid:int, chapter_no:int) -> bool:
         """删除对应章节"""
         session = self.Session()
 
         try:
-            chapter = session.query(Bookchapters).filter_by(Bookchapters.ChapterTitle == chaptertitle, Bookchapters.BookID == int(keyword)).all()
+            chapter = session.query(Bookchapters).filter_by(Bookchapters.ChapterNO == chapter_no, Bookchapters.BookID == bookid).first()
             if not chapter:
                 return False
             session.delete(chapter)
@@ -82,7 +82,7 @@ class Chapterserve:
         finally:
             session.close()
 
-    def gettitle(self, bookid:str, chapterno:str) -> str | bool:
+    def gettitle(self, bookid:int, chapterno:int) -> str | bool:
         """获取文章标题"""
         session = self.Session()
         try:
@@ -96,15 +96,45 @@ class Chapterserve:
         finally:
             session.close()
 
-    def changechapter(self, bookid:str, chapter_no:str, new_chapter_no:str, title:str) -> bool:
+    def getchapter(self, bookid:int, chapterno:int) -> dict | bool:
+        """获取章节信息"""
+        session = self.Session()
+        try:
+            chapter = session.query(Bookchapters).filter_by(BookID = bookid, ChapterNO = chapterno).first()
+            if chapter:
+                return {
+                    "title":chapter.ChapterTitle
+                }
+            return False
+        except SQLAlchemyError as e:
+            print(e)
+            return False
+        finally:
+            session.close()
+
+    def getchapterno(self, bookid:str, title:str) -> int | bool:
+        """获取章节no"""
+        session = self.Session()
+        try:
+            result = session.query(Bookchapters).filter_by(BookID = bookid, ChapterTitle = title).first()
+            if result:
+                return result.ChapterNO
+            return False
+        except SQLAlchemyError as e:
+            print(e)
+            return False
+        finally:
+            session.close()
+
+    def changechapter(self, bookid:str, chapter_no:str, title:str) -> bool:
         """修改章节信息"""
         session = self.Session()
         try:
             chapter = session.query(Bookchapters).filter_by(BookID = bookid, ChapterNO = chapter_no).first()
             if not chapter:
                 return False
-            chapter.ChapterNO = new_chapter_no
             chapter.ChapterTitle = title
+            session.commit()
             return True
         except SQLAlchemyError as e:
             session.rollback()

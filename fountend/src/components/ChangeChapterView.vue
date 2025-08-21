@@ -1,17 +1,22 @@
 <template>
     <div class="warp">
         <div class="addchapter">
-            <h2>添加章节</h2>
+            <h2>修改章节</h2>
             <form @submit.prevent="handleSubmit()">
-                <label for="">书名：</label>
-                <input type="text" v-model="form.bookname" required>
-                <label for="">作者：</label>
-                <input type="text" v-model="form.author" required>
                 <label for="">章节名称：</label>
-                <input type="text" v-model="form.chaptername" required>
+                <input type="text" v-model="form.title" required>
                 <label for="">章节内容：</label>
-                <input type="file" @change="selectFile" accept=".txt,.docx,.html" style="display: flex; width: 100%;font-size: 14px;">
+                <input type="file" @change="selectFile" accept=".txt,.docx,.html">
                 <button type="submit">提交</button>
+            </form>
+            <form @submit.prevent="handleSearch()">
+                <label for="">书名：</label>
+                <input type="text" v-model="query.bookname">
+                <label for="">作者：</label>
+                <input type="text" v-model="query.author">
+                <label for="">章节名称：</label>
+                <input type="text" v-model="query.chaptername">
+                <button type="submit">查询</button>
             </form>
         </div>
     </div>
@@ -23,10 +28,16 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 const store = useStore()
-const form = reactive({
-    bookname: '',
+const query = reactive({
+    bookname:'',
     author:'',
-    chaptername:'',
+    chaptername:''
+})
+const form = reactive({
+    bookname:query.bookname,
+    author:query.author,
+    old_title:query.chaptername,
+    title:'',
     file:null
 })
 const router = useRouter()
@@ -37,12 +48,33 @@ function selectFile(e){
     form.file = e.target.files[0] || null
 }
 
-async function handleSubmit() {
+async function handleSearch() {
     if (permissions.value !== 'admin'){
-        alert("当前帐号不是管理员账号，无权添加")
+        alert("当前帐号不是管理员账号，无权修改")
         return
     }
-    if (!form.bookname || !form.author || !form.chaptername){
+    if(!query.bookname || !query.author || !query.chaptername){
+        alert('书名，作者或章节名称为空')
+        return
+    }
+    try{
+        const data = await store.dispatch('searchchapter', {bookname:query.bookname, author:query.author, title:query.chaptername})
+        if (!data){
+            alert("查询错误")
+            return
+        }
+        Object.assign(form,data)
+    }catch(e){
+        alert(e?.response?.data?.message || '添加失败')
+    }
+}
+
+async function handleSubmit() {
+    if (permissions.value !== 'admin'){
+        alert("当前帐号不是管理员账号，无权修改")
+        return
+    }
+    if (!form.title){
         alert('书名，作者，章节名称为空')
         return
     }
@@ -51,17 +83,18 @@ async function handleSubmit() {
         return
     }
     const fd = new FormData()
-    fd.append('bookname', form.bookname)
-    fd.append('author', form.author)
-    fd.append('chaptername', form.chaptername)
+    fd.append('bookname', query.bookname)
+    fd.append('author', query.author)
+    fd.append('title', form.title)
+    fd.append('old_title',query.chaptername)
     fd.append('file', form.file)
     try{
-        const res = await store.dispatch('addChapter', fd)
-        alert(res.message || '添加成功')
-        form.bookname = '',form.chaptername = '',form.author = '',form.file = null
+        const res = await store.dispatch('updatechapter', fd)
+        alert(res.message || '修改成功')
+        form.bookname = '',form.title = '',form.author = '',form.file = null
         document.querySelector('input[type="file"]').value = ''
     }catch(e){
-        alert(e?.response?.data?.message || '添加失败')
+        alert(e?.response?.data?.message || '修改失败')
     }
 }
 

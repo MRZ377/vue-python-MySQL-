@@ -31,6 +31,52 @@ export default createStore({
     },
     actions:{
         /**
+        * 删除章节
+        * @param {*}
+        * @param {Object}
+        * @returns {Primise}
+        */
+        async delchapter(context, payload){
+            const {data} = await axios.post('/api/delchapter', payload)
+            return data
+         },
+        /**
+         * 修改章节
+         * @param {*} payload
+         * @returns {Primise} 
+         */
+        async updatechapter(_,payload){
+            const {data} = await axios.post('/api/updatechapter', payload,{headers:{'Content-Type':'multipart/form-data'}})
+            return data
+        },
+        /**
+         * 获取章节信息
+         * @param {Primise}
+         * @returns {Primise}
+         */
+        async searchchapter(_,payload){
+            const {data} = await axios.get('/api/searchchapter',{params:payload})
+            return data
+        },
+        /**
+         * 修改书籍
+         * @param {Primise} form
+         * @returns {Primise}
+         */
+        async updatebook(_,payload){
+            const {data} = await axios.post('/api/updatebook', payload)
+            return data
+        },
+        /**
+         * 根据书名和作者搜索书籍
+         * @param {{bookname:string, author:string}} payload
+         * @returns {Primise}
+         */
+        async searchbook(_, payload){
+            const {data} = await axios.get('/api/searchbook', {params:payload})
+            return data
+        },
+        /**
          * 获取时间排序章节
          * @returns {Primise}
          */
@@ -103,77 +149,77 @@ export default createStore({
         *@param {Object}
         *@returns {Primise}
         */ 
-       async addBook(context,payload){
-        const {data} = await axios.post('/api/addbook', payload)
-        return data
-       },
-       /**
+        async addBook(context,payload){
+            const {data} = await axios.post('/api/addbook', payload)
+            return data
+         },
+        /**
         * 删除书籍
         * @param {*}
         * @param {Object}
         * @returns {Primise}
         */
-       async delBook(context, payload){
-        const {data} = await axios.post('/api/delbook', payload)
-        return data
-       },
-       /**
-       *获取书籍列表
-       *@returns Promise<list[dict]>
-       */
-       async getBookList(){
-        const {data} = await axios.get('/api/books')
-        return data
-       },
-       /** 
-       *搜索书籍
-       *@param {*}
-       *@returns {Primise}
-       */
-      async getSearchBook(_,q){
-        const {data} = await axios.get('/api/search',{params:{q}})
-        return data
-      },
-      /**
-      *类别书籍
-      *@param {*}
-      *@returns {Primise}
-      */
-     async getCategory(_, category){
-        const {data} = await axios.get('/api/categories', {params:{category}})
-        return data
-     },
-     /** 
-     *排行榜书籍(按类别分类)
-     *@retruns {Primise}
-     */
-    async getTopBook(){
-        const {data} = await axios.get('/api/top')
-        return data
-    },
-    /**
-     * 登录接口
-     * @param {{username:string, password:string}} payload
-     * @returns {Primise}
-     */
-    async Login({commit}, payload){
-        const {data} = await axios.post('/api/login', payload)
-        if (data.message === '登录成功'){
-            commit('setLoginState', true);
-            commit('setUser', {username: data.username, Permission:data.Permission})
-        }else{
-            commit('setLoginState', false)
+        async delBook(context, payload){
+            const {data} = await axios.post('/api/delbook', payload)
+            return data
+         },
+        /**
+        *获取书籍列表
+        *@returns Promise<list[dict]>
+        */
+        async getBookList(){
+            const {data} = await axios.get('/api/books')
+            return data
+        },
+        /** 
+        *搜索书籍
+        *@param {*}
+        *@returns {Primise}
+        */
+        async getSearchBook(_,q){
+            const {data} = await axios.get('/api/search',{params:{q}})
+            return data
+        },
+        /**
+         *类别书籍
+        *@param {*}
+        *@returns {Primise}
+        */
+        async getCategory(_, category){
+            const {data} = await axios.get('/api/categories', {params:{category}})
+            return data
+        },
+        /** 
+         *排行榜书籍(按类别分类)
+        *@retruns {Primise}
+        */
+        async getTopBook(){
+            const {data} = await axios.get('/api/top')
+            return data
+        },
+        /**
+         * 登录接口
+         * @param {{username:string, password:string}} payload
+         * @returns {Primise}
+         */
+        async Login({commit}, payload){
+            const {data} = await axios.post('/api/login', payload)
+            if (data.message === '登录成功'){
+                commit('setLoginState', true);
+                commit('setUser', {username: data.username, permission:data.permission})
+            }else{
+                commit('setLoginState', false)
+            }
+            return data
+        },
+        /**
+         * 注册接口
+         * @param {{username:string, password:string}} payload
+         * @returns {Primise}
+         */
+        async Register(_, payload){
+            const {data} = await axios.post('/api/register', payload)
+            return data
         }
-        return data
-    },
-    /**
-     * 注册接口
-     * @param {{username:string, password:string}} payload
-     * @returns {Primise}
-     */
-    async Register(_, payload){
-        const {data} = await axios.post('/api/register', payload)
-        return data
-    }
     }
 });

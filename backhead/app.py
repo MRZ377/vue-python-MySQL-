@@ -2,7 +2,7 @@ from flask import Flask,request,jsonify
 from app.serve.bookserve import Bookserve
 from app.serve.chapterserve import Chapterserve
 from app.serve.userserve import Userserve
-from app.serve.utial import ensure_book_dir,del_book_dir
+from app.serve.utial import ensure_book_dir,del_book_dir,del_chapter
 from flask_cors import CORS
 import os, bcrypt
 
@@ -107,10 +107,9 @@ def addchapter() -> dict:
     return jsonify({"message":"章节添加失败"}), 500
 
 @app.route('/api/delbook', methods=['POST'])
-def delbook():
-    data = request.json
-    bookname = data.get("bookname")
-    author = data.get("author")
+def delbook() -> dict:
+    bookname = request.form.get("bookname")
+    author = request.form.get("author")
     try:
         bookid = bookserve.getbookid(bookname, author)
         result = bookserve.delbook(bookid)
@@ -182,6 +181,85 @@ def register() -> dict:
     except Exception as e:
         print(e)
         return jsonify({"message":"数据库错误"}), 500
+
+@app.route('/api/searchbook', methods=['GET'])
+def searchbook() -> dict:
+    bookname = request.args.get('bookname')
+    author = request.args.get('author')
+    bookid = bookserve.getbookid(bookname=bookname, author=author)
+    if bookid:
+        bookinfo = bookserve.getbook(bookid)
+        if bookinfo:
+            return jsonify(bookinfo), 200
+    return jsonify({"message":"获取失败"}), 500
+
+@app.route('/api/updatebook', methods=['POST'])
+def updatebook() -> bool:
+    data = request.get_json()
+    bookname = data.get('bookname')
+    author = data.get('author')
+    bookimage = data.get('bookimage')
+    category = data.get('category')
+    bookinfo = data.get('bookinfo')
+    result = bookserve.changebook(bookname=bookname, bookimage=bookimage, author=author, category=category, bookinfo=bookinfo)
+    if not result:
+        return jsonify({"message":"修改失败"}), 500
+    return jsonify({"message":"修改成功"}), 200
+    
+@app.route('/api/searchchapter', methods=['GET'])
+def searchchapter() -> dict:
+    bookname = request.args.get('bookname')
+    author = request.args.get('author')
+    title = request.args.get('title')
+    bookid = bookserve.getbookid(bookname=bookname, author=author)
+    if not bookid:
+        return jsonify({"message":"书籍不存在"}), 401
+    chapter_no = chapterserve.getchapterno(bookid=bookid, title=title)
+    if not chapter_no:
+        return jsonify({"message":"章节不存在"}), 401
+    chaptertitle = chapterserve.getchapter(bookid=bookid, chapterno=chapter_no)
+    return jsonify(chaptertitle), 200
+
+@app.route('/api/updatechapter', methods=['POST'])
+def updatechapter() -> bool:
+    bookname = request.form.get('bookname')
+    author = request.form.get('author')
+    old_title = request.form.get('old_title')
+    title = request.form.get('title')
+    file = request.files.get('file')
+    print(title)
+    bookid = bookserve.getbookid(bookname=bookname, author=author)
+    chapter_no = chapterserve.getchapterno(bookid=bookid, title=old_title)
+    book_path = os.path.join(BOOKS_DIR, str(bookid))
+
+    ext = os.path.splitext(file.filename)[1]
+    new_name = f"{chapter_no}{ext}"
+    new_path = os.path.join(book_path, new_name)
+    if os.path.exists(new_path):
+        os.remove(new_path)
+    file.save(new_path)
+
+    result = chapterserve.changechapter(bookid=bookid, chapter_no=chapter_no, title=title)
+    if result:
+        return jsonify({"message":"修改成功"}), 200
+    return jsonify({"message":"修改失败"}), 500
+
+@app.route('/api/delchapter', methods=['POST'])
+def delchapter() -> dict:
+    bookname = request.form.get("bookname")
+    author = request.form.get("author")
+    title = request.form.get("title")
+    try:
+        bookid = bookserve.getbookid(bookname, author)
+        chapter_no = chapterserve.getchapterno(bookid=bookid, title=title)
+        result = chapterserve.delchapter(bookid=bookid, chapter_no=chapter_no)
+        if result:
+            if del_chapter(bookid=bookid, chapter_no=chapter_no, bookdir=BOOKS_DIR):
+                return jsonify({"message":"删除成功"}), 200
+        return jsonify({"message":"删除失败"}), 500
+    except Exception as e:
+        print(e)
+        return jsonify({"message":"数据库错误"}), 500    
 
 if __name__ == '__main__':
     app.run(debug=True)

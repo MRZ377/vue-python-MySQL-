@@ -14,16 +14,28 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
+const router = useRouter()
 const store = useStore()
 const form = reactive({
     bookname:'',
     author:''
 })
+const permissions = computed(() => store.getters.getUser?.permission)
+const isLoggedIn = computed(() => store.getters.getLoginState)
 
 async function handleSubmit() {
+    if(permissions.value !== 'admin'){
+        alert("当前账号不是管理员账号，无权添加书籍")
+        return;
+    }
+    if(!form.bookname || !form.author){
+        alert("书名或作者为空")
+        return
+    }
     try{
         const res = await store.dispatch('delBook', form)
         alert(res.message || '删除成功')
@@ -32,6 +44,14 @@ async function handleSubmit() {
         alert(e?.response?.data?.message || '添加失败')
     }
 }
+onMounted(() =>{
+    store.commit('restoreUser')
+    if (!isLoggedIn.value){
+        alert("尚未登陆")
+        router.replace('/')
+    }
+}
+)
 </script>
 
 <style scoped>
