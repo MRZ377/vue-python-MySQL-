@@ -24,7 +24,7 @@
             </div>
             <div class="change">
                 <router-link v-if="+chapter_no > 1" :to="`/books/${bookid}/${Number(chapter_no) - 1}`">上一章</router-link>
-                <router-link :to="`/book/${bookid}`">目录</router-link>
+                <router-link :to="{name:'bookdetail', params:{bookid}}">目录</router-link>
                 <router-link :to="`/books/${bookid}/${Number(chapter_no) + 1}`">下一章</router-link>
             </div>
         </div>
@@ -73,8 +73,10 @@ async function load() {
 onMounted(load)
 
 watch(currentMode, val =>{
-    document.body.className = val
-},
+    document.body.className = val},
+    {immediate:true}
+)
+watch(
     ()=>[route.params.bookid, route.params.chapter_no],
     ()=>load(),
     {immediate:true}

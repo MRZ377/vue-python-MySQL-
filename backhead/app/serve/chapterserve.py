@@ -8,22 +8,28 @@ class Chapterserve:
         self.db.create_tables()
         self.Session = self.db.Session
 
-    def getchapterlist(self, keyword:str) -> list[dict] | bool:
+    def getchapterlist(self, keyword:str) -> dict | bool:
         """根据书籍id获取章节列表"""
         session = self.Session()
 
         try:
+            latest = (session.query(Bookchapters).filter_by(BookID = keyword).order_by(Bookchapters.CreatedTime.desc())).first()
             chapterlist = (session.query(Bookchapters).filter(Bookchapters.BookID == int(keyword)).all())
             if chapterlist:
-                return [
+                return {
+                    "list":[
                     {
                         "chapter_no":chapter.ChapterNO,
                         "title":chapter.ChapterTitle,
-                        "url":f"/books/{chapter.BookID}/{chapter.ChapterNO}",
-                        "createdtime":chapter.CreatedTime.strftime("%Y-%m-%d")
+                        "createdtime":chapter.CreatedTime.strftime("%Y-%m-%d"),
                     }
                     for chapter in chapterlist
-                ]
+                ],
+                    "latest":{
+                        "title":latest.ChapterTitle,
+                        "chapter_no":latest.ChapterNO
+                        }
+                }
             else:
                 return []
         except Exception as e:

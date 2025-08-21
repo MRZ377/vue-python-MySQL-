@@ -13,13 +13,13 @@
             <h1>{{ info?.bookname }}</h1>
             <div class="small">
                 <span>作者：{{ info?.author }}</span>
-                <span>状态：{{ info?.bookstate }}</span>
-                <span>更新：{{ info?.updatedtime }}</span>
-                <span>最新：<a :href="lastItem.url">{{ lastItem.zhangjiemingcheng }}</a></span>
+                <span>状态：{{ info?.state }}</span>
+                <span>更新：{{ info?.updatetime }}</span>
+                <span>最新：<router-link :to="{name:'content', params:{bookid:info.bookid, chapter_no:latest.chapter_no}}">{{ latest.title }}</router-link></span>
             </div>
             <div class="readlink">
                 <a href="">加入书架</a>
-                <router-link :to="list[0]?.url" class="rl">开始阅读</router-link>
+                <router-link :to="{name:'content', params:{bookid:info.bookid, chapter_no:list[0].chapter_no}}" class="rl">开始阅读</router-link>
             </div>
             <div class="intro">
                 <dl>
@@ -41,43 +41,51 @@
 
 <script setup>
 import { useRoute } from 'vue-router';
-import {ref, onMounted, computed} from 'vue';
+import {ref, onMounted, watch} from 'vue';
 import { useStore } from 'vuex';
 
 const store = useStore()
 const route = useRoute()
-const bookid = route.params.bookid
 const info = ref({
     author:'',
-    bookid:'',
+    bookid:0,
     bookimage:'',
     bookname:'',
     category:'',
     createtime:'',
-    bookinfo:''
+    bookinfo:'',
+    state:'',
+    updatetime:''
 })
-const list = ref([])
-
-const lastItem = computed(()=>
-    list.value.length
-        ?list.value[list.value.length - 1]
-        :{url:'', title:''}
-)
-
-onMounted(async() =>{
+const list = ref([
+    {chapter_no:0, title:''}
+])
+const latest = ref({
+    chapter_no:0,
+    title:''
+})
+async function loadBook() {
+    const bookid = route.params.bookid
     if(history.state?.info){
         info.value = history.state.info
         list.value = history.state.list || []
+        latest.value = history.state.latest
     }else{
         try{
-        const {bookinfo, chapterlist} = await store.dispatch('getDetail', bookid)
-        Object.assign(info.value, bookinfo)
+        const {info:book, chapterlist, latest:latests} = await store.dispatch('getDetail', bookid)
+        info.value = book
         list.value = chapterlist
+        latest.value = latests
         }catch(e){
             console.error(e)
         }
     }
 }
+onMounted(()=>loadBook())
+watch(
+    ()=>route.fullPath,
+    ()=>loadBook(),
+    {immediate:false}
 )
 </script>
 

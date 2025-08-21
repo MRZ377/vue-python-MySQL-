@@ -119,9 +119,14 @@ export default createStore({
          * @returns {Primise}  
          */
         async getDetail(_, bookid){
-            const {data:bookinfo} = await axios.get(`/api/book/${bookid}`)
-            const {data:chapterlist} = await axios.get(`/api/content/${bookid}`)
-            return {bookinfo, chapterlist} 
+            const [bookinfo, chapters] = await Promise.all([
+                axios.get(`/api/book/${bookid}`),
+                axios.get(`/api/content/${bookid}`)
+            ])
+            const info = bookinfo.data
+            const chapterlist = chapters.data.list
+            const latest = chapters.data.latest
+            return {info, chapterlist, latest} 
         },
         /**
          * 书籍详情
@@ -135,11 +140,12 @@ export default createStore({
                 axios.get(`/api/content/${bookid}`)
             ])
             const info = bookinfo.data
-            const chapterlist = chapters.data
+            const chapterlist = chapters.data.list
+            const latest = chapters.data.latest
             router.push({
                 name:'bookdetail',
                 params:{bookid},
-                state:{info, list:chapterlist}
+                state:{info, list:chapterlist, latest:latest}
             })
             return info
         },

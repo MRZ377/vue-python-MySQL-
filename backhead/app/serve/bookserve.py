@@ -110,7 +110,9 @@ class Bookserve:
                         "author":book.Author,
                         "category":book.Category,
                         "bookinfo":book.BookInfo,
-                        "createtime":book.CreatedTime.strftime("%Y-%m-%d")
+                        "state":book.BookState,
+                        "createtime":book.CreatedTime.strftime("%Y-%m-%d"),
+                        "updatetime":book.UpdateTime.strftime("%Y-%m-%d")
                     }
                 
             else:
