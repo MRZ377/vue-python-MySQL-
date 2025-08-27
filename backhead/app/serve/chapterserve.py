@@ -59,9 +59,9 @@ class Chapterserve:
         session = self.Session()
 
         try:
-            chapter = session.query(Bookchapters).filter_by(Bookchapters.ChapterNO == chapter_no, Bookchapters.BookID == bookid).first()
+            chapter = session.query(Bookchapters).filter(Bookchapters.ChapterNO == chapter_no, Bookchapters.BookID == bookid).first()
             if not chapter:
-                return False
+                return True
             session.delete(chapter)
             session.commit()
             return True

@@ -186,7 +186,7 @@ class Bookserve:
         try:
             book = session.query(Book).filter(Book.BookID == bookid).first()
             if not book:
-                return False
+                return True
             session.delete(book)
             session.commit()
             return True

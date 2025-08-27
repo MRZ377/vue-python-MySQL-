@@ -108,8 +108,9 @@ def addchapter() -> dict:
 
 @app.route('/api/delbook', methods=['POST'])
 def delbook() -> dict:
-    bookname = request.form.get("bookname")
-    author = request.form.get("author")
+    data = request.json
+    bookname = data.get("bookname")
+    author = data.get("author")
     try:
         bookid = bookserve.getbookid(bookname, author)
         result = bookserve.delbook(bookid)

@@ -18,6 +18,8 @@ def del_book_dir(bookid:int, bookdir) ->bool:
         except Exception as e:
             print(e)
             return False
+    elif not os.path.isdir(bookdir):
+        return True
     return False
 
 def del_chapter(bookid:int, chapter_no:int, bookdir) -> bool:
@@ -32,4 +34,6 @@ def del_chapter(bookid:int, chapter_no:int, bookdir) -> bool:
         except Exception as e:
             print(e)
             return False
+    elif os.path.isfile(chapter_path):
+        return True
     return False
